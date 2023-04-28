@@ -8,48 +8,66 @@
 //Conexión DB
 require('../database/database.php');
 
-// Atributos
+// Datos de entrada
 
-$nombre = $_POST['nombre'];
+$nombre = htmlspecialchars($_POST['nombre']);
 $rut = $_POST['rut'];
-$alias = $_POST['alias'];
+$alias = htmlspecialchars(trim($_POST['alias']));
 $email = $_POST['email'];
-$region = $_POST['region'];
-$comuna = $_POST['comuna'];
-$candidato = $_POST['candidato'];
-$fuentes = $_POST['fuentes'];
+$region = (!empty($_POST['region'])? $_POST['region'] : '');
+$comuna = (!empty($_POST['comuna'])? $_POST['comuna'] : '');
+$candidato = (!empty($_POST['candidato'])? $_POST['candidato'] : '');
+$fuentes = $_POST['fuentes'] ?? null;
+
+$votacion = [
+  'nombre' => $nombre,
+  'rut' => $rut,
+  'alias' => $alias,
+  'email' => $email,
+  'region' => $region,
+  'comuna' => $comuna,
+  'candidato' => $candidato,
+  'fuentes' => $fuentes,
+];
 
 // Validaciones
 
-function validar_nombre_apellido($nombre) {
-    $nombre = filter_var($nombre, FILTER_SANITIZE_STRING);
-    return preg_match('/^[a-zA-ZñÑáéíóúÁÉÍÓÚäëïöüÄËÏÖÜ\s]+$/', $nombre) === 1;
+function check_datos_votacion($votacion) {
+  // Verificamos que los campos requeridos estén presentes
+  return isset(
+    $_POST['nombre'], 
+    $_POST['rut'], 
+    $_POST['alias'], 
+    $_POST['email'], 
+    $_POST['region'], 
+    $_POST['comuna'], 
+    $_POST['candidato']) !== false; 
 }
 
-function validarRut($rut) {
-    $rut = preg_replace('/[^0-9Kk]/', '', $rut); // Eliminar guiones y puntos, dejar solo números y K/k
-    $dv = strtoupper(substr($rut, -1)); // Obtener dígito verificador
-    $num = substr($rut, 0, -1); // Obtener número sin dígito verificador
-  
-    $factores = array(2, 3, 4, 5, 6, 7);
-    $suma = 0;
-    for ($i = strlen($num) - 1, $j = 0; $i >= 0; $i--, $j++) {
-      if ($j >= count($factores)) {
-        $j = 0;
-      }
-      $suma += $num[$i] * $factores[$j];
-    }
-    $resto = $suma % 11;
-  
-    if ($dv == '0' && $resto == 0) {
-      return true;
-    } elseif ($dv == 'K' && $resto == 10) {
-      return true;
-    } elseif ($dv == (11 - $resto)) {
-      return true;
-    } else {
+function validar_nombre_apellido($nombre) {
+    $patron = "/^[a-zA-Z]{2,30}(\s[a-zA-Z]{2,30})*$/";
+  if (preg_match($patron, $nombre) && strpos($nombre, ' ') !== false) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function validar_rut($rut) {
+
+    if (!preg_match('/^[1-9]\d{0,7}[-|‐]{1}[0-9kK]{1}$/', $rut)) {
       return false;
     }
+    $tmp = explode('-', $rut);
+    $digv = strtolower($tmp[1]);
+    $rut = (int) $tmp[0];
+    $m = 0;
+    $s = 1;
+    for (; $rut; $rut = (int) ($rut / 10)) {
+      $s = ($s + ($rut % 10) * (9 - ($m++ % 6))) % 11;
+    }
+    $digv_calc = $s ? ($s - 1) : 'k';
+    return $digv == $digv_calc;
   }
 
 function validar_email($email) {
@@ -58,33 +76,68 @@ function validar_email($email) {
 
 function validar_alias($alias) {
     $alias = filter_var($alias, FILTER_SANITIZE_STRING);
-    return preg_match('/^[a-zA-Z0-9]{6,}$/', $alias) === 1;
+    return preg_match('/^[a-zA-Z0-9]{6,}$/', $alias) !== false;
 }
 
 function validar_coleccion_fuentes($fuentes) {
     return count($fuentes) >= 2 !== false;
 }
 
-if (validar_email($email) && validar_rut($rut)):
-    $query = "INSERT INTO votaciones (nombre, alias, rut, email, region_id, comuna_id, candidato_id, fuentes) VALUES (:nombre, :alias, :rut, :email, :region_id, :comuna_id, :candidato_id, :fuentes)";
-    
-    $stmt = $conn->prepare($query);
-    $exec = $stmt->execute([
-        'nombre' => $nombre, 
-        'alias' => $alias,
-        'rut' => $rut,
-        'email' => $email,
-        'region_id' => $region,
-        'comuna_id' => $comuna,
-        'candidato_id' => $candidato,
-        'fuentes' => json_encode($fuentes),
-    ]);
-    
-    if ($exec) {
-        echo "Ingresado";
+function validar_voto_duplicado($rut, $conn) {
+  $query = "SELECT COUNT(*) AS contador FROM votaciones WHERE rut = :rut";
+  $stmt = $conn->prepare($query);
+  $stmt->execute(['rut' => $rut]);
+  $resultado = $stmt->fetch(PDO::FETCH_ASSOC)["contador"];
+
+    if ($resultado > 0) {
+        return true;
     } else {
-        echo "NO ingresado";
+        return false;
     }
-endif;
+}
 
+function validar_opciones($votacion) {
+  return $votacion['region'] > 0 
+        && $votacion['comuna'] > 0 
+        && $votacion['candidato'] > 0 !== false;
+}
 
+function check_coleccion_validaciones($votacion) {
+  return validar_nombre_apellido($votacion['nombre']) &&
+    validar_rut($votacion['rut']) &&
+    validar_email($votacion['email']) &&
+    validar_alias($votacion['alias']) &&
+    validar_coleccion_fuentes($votacion['fuentes']) &&
+    validar_opciones($votacion);
+}
+
+try {
+  if(validar_voto_duplicado($votacion['rut'], $conn)):
+    echo "duplicado";
+  elseif (!check_datos_votacion($votacion)):
+  echo 'incompleto';
+  elseif (!check_coleccion_validaciones($votacion)):
+    echo "error";
+    else:
+        $query = "INSERT INTO votaciones (nombre, alias, rut, email, region_id, comuna_id, candidato_id, fuentes) 
+                  VALUES (:nombre, :alias, :rut, :email, :region_id, :comuna_id, :candidato_id, :fuentes);";
+
+        $stmt = $conn->prepare($query);
+        $stmt->execute([
+            'nombre' => $votacion['nombre'], 
+            'alias' => $votacion['alias'],
+            'rut' => $votacion['rut'],
+            'email' => $votacion['email'],
+            'region_id' => $votacion['region'],
+            'comuna_id' => $votacion['comuna'],
+            'candidato_id' => $votacion['candidato'],
+            'fuentes' => json_encode($votacion['fuentes']),
+        ]);
+
+        echo "valido";
+    endif;
+  
+} catch (Exception $e) {
+  // Mostramos un mensaje de error al usuario
+  echo '<p>Error: ' . htmlspecialchars($e->getMessage()) . '</p>';
+}

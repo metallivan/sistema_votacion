@@ -13,14 +13,12 @@ const soloLetras = event => {
 };
 
 const validarNombreApellido = (nombre) => {
-    const regex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚäëïöüÄËÏÖÜ\s]+$/;
-    nombre = nombre.trim();
-    return regex.test(nombre);
+    var patron = /^[a-zA-ZñÑáéíóúÁÉÍÓÚäëïöüÄËÏÖÜ]{2,30}(\s[a-zA-ZñÑáéíóúÁÉÍÓÚäëïöüÄËÏÖÜ]{2,30})*$/;
+    return patron.test(nombre) && nombre.indexOf(' ') !== -1;
 };
 
 const validarRUT = (rut) => {
-
-    if (!/^[0-9]+[-|‐]{1}[0-9kK]{1}$/.test(rut)) {
+    if (!/^[1-9]\d{0,7}[-|‐]{1}[0-9kK]{1}$/.test(rut)) {
         return false;
       }
       var tmp = rut.split('-');
@@ -81,7 +79,7 @@ $(document).ready(function () {
                 .text("");
             nombre.addClass('is-valid');
         } else {
-            let msg = nombre.val() === "" ? "Ingrese su nombre y apellido" : "Nombre incorrecto";
+            let msg = nombre.val() === "" ? "Ingrese su nombre y apellido" : "Ingrese correctamente su nombre y apellido";
             $("#alerta-nombre")
                 .addClass('invalid-feedback')
                 .text(msg);
@@ -155,6 +153,72 @@ $(document).ready(function () {
             }
     };
 
+    const validarSelectRegion = () => {
+        let region = $("#region");
+        region.removeClass("is-valid is-invalid");
+
+        $("#alerta-region")
+            .removeClass('valid-feedback invalid-feedback');
+
+        if(region.val()!== "") {
+            $("#alerta-region")
+            .addClass('valid-feedback')
+            .text("");
+            region.addClass('is-valid');
+        } else {
+            $("#alerta-region")
+               .addClass('invalid-feedback')
+               .text("Seleccione una región");
+            region.addClass('is-invalid');
+        }                    
+    };
+
+    const validarSelectComuna = () => {
+        let comuna = $("#comuna");
+        comuna.removeClass("is-valid is-invalid");
+        
+        $("#alerta-comuna")
+            .removeClass('valid-feedback invalid-feedback');
+        
+        if(comuna.val()!== "") {
+            $("#alerta-comuna")
+              .addClass('valid-feedback')
+              .text("");
+            comuna.addClass('is-valid');
+        } else {
+            if( comuna.prop('disabled') ) {
+                $("#alerta-comuna")
+                    .addClass('invalid-feedback')
+                    .text("Seleccione una region primero");
+            } else {
+                $("#alerta-comuna")
+                    .addClass('invalid-feedback')
+                    .text("Seleccione una comuna");
+                }
+            comuna.addClass('is-invalid');
+        }
+    };
+
+    const validarSelectCandidato = () => {
+        let candidato = $("#candidato");
+        candidato.removeClass("is-valid is-invalid");
+        
+        $("#alerta-candidato")
+            .removeClass('valid-feedback invalid-feedback');
+        
+        if(candidato.val()!== "") {
+            $("#alerta-candidato")
+             .addClass('valid-feedback')
+             .text("");
+            candidato.addClass('is-valid');
+        } else {
+            $("#alerta-candidato")
+               .addClass('invalid-feedback')
+               .text("Seleccione un candidato");
+            candidato.addClass('is-invalid');
+        }
+    };
+
     const validarOpcionesFuentes = () => {
         let checked = $('input[name="fuentes[]"]:checked').length;
         let fuentes = $('input[name="fuentes[]"]');
@@ -180,8 +244,9 @@ $(document).ready(function () {
     $.ajax({
         url: 'src/regiones.php',
         type: 'GET',
+        dataType: 'json',
         success: function(data) {
-            const regiones = JSON.parse(data);
+            const regiones = data;
 
             regiones.map(
                 r => $("#region").append(`<option value="${r.id}">${r.region}</option>`)
@@ -199,13 +264,18 @@ $(document).ready(function () {
             .removeAttr('disabled')
             .append(`<option value="">Seleccione una comuna...</option>`);
 
-        $.post('src/comunas.php', {region: region}, function(data) {
+        $.post('src/comunas.php', {region: region})
+        .done(function(data) {
             const comunas = JSON.parse(data);
             
             comunas.map(
                 c => $("#comuna").append(`<option value="${c.id}">${c.comuna}</option>`)
             );
-        });
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+                console.log(textStatus, errorThrown);
+            }
+        );
        
     });
 
@@ -224,23 +294,61 @@ $(document).ready(function () {
         }
     });
 
+
+    let alerta = $("#alerta-response");
+
+    alerta.hide();
     
     $("#votarBtn").on('click', function (e) {
         let formData = $("form").serialize();
         e.preventDefault();
+        let alertaMsg = $("#alerta-response-msg");
         
         validarCampoNombre();
         validarCampoRut();
         validarCampoAlias();
         validarCampoEmail();
+        validarSelectRegion();
+        validarSelectComuna();
+        validarSelectCandidato();
         validarOpcionesFuentes();
+
+        
         $.ajax({
             type: "POST",
             url: "src/index.php",
             data: formData,
-            // dataType: "dataType",
             success: function (response) {
-                console.log(response)
+                alerta.removeClass("alert-danger alert-warning alert-success").show();
+          
+                switch (response) {
+                    case 'duplicado':
+                        alerta.addClass("alert-warning");    
+                        alertaMsg.text("El voto ya ha sido emitido por usted. Por favor, vuelva a ingresar el voto con un RUT diferente.");
+                        $("#rut").addClass('is-invalid');
+                    break;
+                    case 'incompleto':
+                        alerta.addClass("alert-warning");
+                        alertaMsg.text("Por favor rellene todos los datos.");
+                    break;
+                    case 'error':
+                        alerta.addClass("alert-danger");
+                        alertaMsg.text("Existen datos mal ingresados en el formulario. Por favor, ingrese los datos correctamente.");
+                    break;
+                    case 'valido':
+                        alerta.addClass("alert-success");
+                        alertaMsg.text("Su voto ha sido enviado correctamente. Muchas gracias por participar.");
+                        $("input").removeClass("is-valid");
+                        $("select").removeClass("is-valid");
+                        $("form")[0].reset();
+                        $("#comuna").attr("disabled", "disabled");
+                    break;   
+                }
+
+                setTimeout(function() {
+                    alerta.fadeOut();
+                }, 3500);
+                
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log(textStatus, errorThrown);
