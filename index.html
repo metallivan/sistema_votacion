@@ -18,34 +18,35 @@
             <div class="form-group row">
                 <label for="nombre" class="col-sm-2 col-form-label col-form-label-sm">Nombre y Apellido</label>
                 <div class="col-sm-10">
-                    <input type="text" name="nombre" id="nombre" class="form-control form-control-sm is-valid" placeholder="Ingrese su nombre y apellido" autocomplete="off" required>
-                </div>
-                <div class="valid-feedback">
-                    Looks good!
+                    <input type="text" name="nombre" id="nombre" class="form-control form-control-sm" placeholder="Ingrese su nombre y apellido" autocomplete="off" required pattern="[a-zA-ZñÑáéíóúÁÉÍÓÚäëïöüÄËÏÖÜ\s]+" minlength="5" maxlength="255">
+                    <div id="alerta-nombre"></div>
                 </div>
             </div>
             <div class="form-group row">
                 <label for="alias" class="col-sm-2 col-form-label col-form-label-sm">Alias</label>
                 <div class="col-sm-10">
-                    <input type="text" name="alias" id="alias" class="form-control form-control-sm" placeholder="Ingrese un alias" autocomplete="off" required>
+                    <input type="text" name="alias" id="alias" class="form-control form-control-sm" placeholder="Ingrese un alias" autocomplete="off" required minlength="6" maxlength="255">
+                    <div id="alerta-alias"></div>
                 </div>
             </div>
             <div class="form-group row">
                 <label for="rut" class="col-sm-2 col-form-label col-form-label-sm">RUT</label>
                 <div class="col-sm-10">
-                    <input type="text" name="rut" id="rut" class="form-control form-control-sm" placeholder="Ingrese su RUT" autocomplete="off" required>
+                    <input type="text" name="rut" id="rut" class="form-control form-control-sm" placeholder="Ingrese su RUT sin puntos (Ej: 12345678-9)" autocomplete="off" required pattern="[0-9kK\-]" maxlength="10">
+                    <div id="alerta-rut"></div>
                 </div>
             </div>
             <div class="form-group row">
                 <label for="email" class="col-sm-2 col-form-label col-form-label-sm">Email</label>
                 <div class="col-sm-10">
                     <input type="email" name="email" id="email" class="form-control form-control-sm" placeholder="Ingrese su email (Ej: example@mail.com)" autocomplete="off" required>
+                    <div id="alerta-email"></div>
                 </div>
             </div>
             <div class="form-group row">
                 <label for="region" class="col-sm-2 col-form-label col-form-label-sm">Región</label>
                 <div class="col-sm-10">
-                    <select name="region" id="region" class="form-control form-control-sm">
+                    <select name="region" id="region" class="form-control form-control-sm" required>
                         <option value="" selected>Seleccione región...</option>
                     </select>
                 </div>
@@ -53,7 +54,7 @@
             <div class="form-group row">
                 <label for="comuna" class="col-sm-2 col-form-label col-form-label-sm">Comuna</label>
                 <div class="col-sm-10">
-                    <select name="comuna" id="comuna" class="form-control form-control-sm" disabled>
+                    <select name="comuna" id="comuna" class="form-control form-control-sm" disabled required>
                         <option value="" selected>Seleccione una región primero...</option>
                     </select>
                 </div>
@@ -61,7 +62,7 @@
             <div class="form-group row">
                 <label for="candidato" class="col-sm-2 col-form-label col-form-label-sm">Candidato</label>
                 <div class="col-sm-10">
-                    <select name="candidato" id="candidato" class="form-control form-control-sm">
+                    <select name="candidato" id="candidato" class="form-control form-control-sm" required>
                         <option value="" selected>Seleccione su candidato favorito...</option>
                     </select>
                 </div>
@@ -71,30 +72,32 @@
                 <div class="col-sm-10">
                     
                     <div class="my-2">
-                        <input type="checkbox" id="web" name="fuentes[]" value="Web">
-                        <label for="web">Web</label>
+                        <input type="checkbox" id="web" name="fuentes[]" value="Web" class="form-check-input">
+                        <label for="web" class="form-check-label">Web</label>
                     </div>
                     
                     <div class="my-2">
-                        <input type="checkbox" id="tv" name="fuentes[]" value="TV">
-                        <label for="tv">TV</label>
+                        <input type="checkbox" id="tv" name="fuentes[]" value="TV" class="form-check-input">
+                        <label for="tv" class="form-check-label">TV</label>
                     </div>
                     
                     <div class="my-2">
-                        <input type="checkbox" id="rrss" name="fuentes[]" value="Redes Sociales">
-                        <label for="rrss">Redes Sociales</label>
+                        <input type="checkbox" id="rrss" name="fuentes[]" value="Redes Sociales" class="form-check-input">
+                        <label for="rrss" class="form-check-label">Redes Sociales</label>
                     </div>
                     
                     <div class="my-2">
-                        <input type="checkbox" id="amigo" name="fuentes[]" value="Amigo">
-                        <label for="amigo">Amigo</label>
+                        <input type="checkbox" id="amigo" name="fuentes[]" value="Amigo" class="form-check-input">
+                        <label for="amigo" class="form-check-label" >Amigo</label>
+                        <div id="alerta-fuentes"></div>
                     </div>
+                    
                 </div>
             </div>
 
             <div class="form-group row">
                 <div class="col-sm-10">
-                    <button type="submit" id="votarBtn" class="btn btn-success btn-sm col-sm-2">Votar</button>
+                    <button type="button" id="votarBtn" class="btn btn-success btn-sm col-sm-2">Votar</button>
                 </div>
             </div>
         </form>
