@@ -1,5 +1,8 @@
 Proyecto de Sistema de votación:
 
+Autor: Iván Hernández Contreras
+Email: iva.hernandez.con@gmail.com
+
 Lenguajes utilizados:
 
   - PHP (v8.2.0)
