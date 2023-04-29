@@ -2,10 +2,44 @@ Proyecto de Sistema de votación:
 
 Lenguajes utilizados:
 
-    - PHP (v8.2.0)
-    - Javascript
-    - MySQL (v15.1 Distrib 10.4.27-MariaDB)
-    - Librería jQuery (v3.5.1)
+  - PHP (v8.2.0)
+  - Javascript
+  - MySQL (v15.1 Distrib 10.4.27-MariaDB)
+  - Librería jQuery (v3.5.1)
+
+Estructura de carpetas:
+
+sistema_votacion (raíz)/
+    |
+    ├──database/
+    |    |
+    |    └──database.php
+    ├──sql/
+    |    |
+    |    └──sistema_votacion.sql
+    ├──src/
+    |    |
+    |    ├──js/
+    |    |  |
+    |    |  ├──index.js
+    |    |  └──validaciones.js
+    |    |
+    |    ├──php/
+    |    |   |
+    |    |   ├──candidatos.php
+    |    |   ├──comunas.php
+    |    |   └──regiones.php
+    |    |
+    |    ├──utils/
+    |    |     └──validaciones.php
+    |    |
+    |    └──index.php
+    |
+    ├──.gitignore
+    ├──index.html
+    └──LEEME.txt
+
+----------------------------------------------------------------
 
 Pasos para la instalación:
 
@@ -13,7 +47,7 @@ Pasos para la instalación:
 
     git clone https://github.com/metallivan/sistema_votacion.git
 
-    2. Si está utilizando alguna distribución como XAMPP o WAMP, clone el proyecto en la carpeta htdocs.
+    2. Si está utilizando alguna distribución como XAMPP o WAMP (https://www.apachefriends.org/es/index.html), clone el proyecto en la carpeta htdocs.
 
     3. Una vez clonado el proyecto, busque la carpeta /sql y en ella encontrará el archivo sistema_votacion.sql.
 
@@ -32,7 +66,7 @@ Pasos para la instalación:
             
             - Abra una terminal en la carpeta raíz del proyecto y ejecute el siguiente comando:
             php -S 127.0.0.1:3000
-            [ADVERTENCIA: Para realizar este paso, debe tener instalado PHP desde la versión 8 en adelante en su entorno.]
+            [ADVERTENCIA: Para realizar este paso, debe tener instalado PHP desde la versión 8 en adelante en su entorno (https://www.php.net/downloads).]
             
             - Deberá aparecer el siguiente mensaje en la terminal:
                 [Fri Apr 28 22:04:43 2023] PHP 8.2.0 Development Server (http://127.0.0.1:3000) started 
