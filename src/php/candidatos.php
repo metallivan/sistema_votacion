@@ -6,7 +6,7 @@
  */
 
 //Conexión DB
-require('../database/database.php');
+require('..\..\database\database.php');
 
     
 $query = "SELECT * FROM candidatos";

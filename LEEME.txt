@@ -1,0 +1,46 @@
+Proyecto de Sistema de votación:
+
+Lenguajes utilizados:
+
+    - PHP (v8.2.0)
+    - Javascript
+    - MySQL (v15.1 Distrib 10.4.27-MariaDB)
+    - Librería jQuery (v3.5.1)
+
+Pasos para la instalación:
+
+    1. Seleccione una ruta para clonar el proyecto y, en una terminal, acceda a la ruta elegida y copie el siguiente comando:
+
+    git clone https://github.com/metallivan/sistema_votacion.git
+
+    2. Si está utilizando alguna distribución como XAMPP o WAMP, clone el proyecto en la carpeta htdocs.
+
+    3. Una vez clonado el proyecto, busque la carpeta /sql y en ella encontrará el archivo sistema_votacion.sql.
+
+    4. Inicie una aplicación de administración de base de datos como MySQL Workbench o phpMyAdmin de XAMPP.
+
+    5. Importe el archivo sistema_votacion.sql a la aplicación con la siguiente configuración:
+        Nombre del servidor = localhost
+        Nombre de usuario = root
+        Contraseña = sin contraseña
+        Nombre de la base de datos = sistema_votacion
+
+    6. Después de importar la base de datos, hay dos formas de activar el proyecto:
+
+            Método 1 (normal):
+            - Verifique que los servicios de la base de datos estén activos.
+            
+            - Abra una terminal en la carpeta raíz del proyecto y ejecute el siguiente comando:
+            php -S 127.0.0.1:3000
+            [ADVERTENCIA: Para realizar este paso, debe tener instalado PHP desde la versión 8 en adelante en su entorno.]
+            
+            - Deberá aparecer el siguiente mensaje en la terminal:
+                [Fri Apr 28 22:04:43 2023] PHP 8.2.0 Development Server (http://127.0.0.1:3000) started 
+
+            - Copie http://127.0.0.1:3000 y péguelo en su navegador y presione ENTER.
+
+            Método 2 (con aplicaciones de stack AMPP (XAMPP, WAMP, etc.), El proyecto se ocupó con XAMPP):
+            - Verifique que los servicios de Apache y MySQL estén activos.
+            
+            - En su navegador, copie y pegue http://127.0.0.1/sistema_votacion/ o http://localhost/sistema_votacion/ y presione ENTER.
+
