@@ -13,7 +13,7 @@ require('../database/database.php');
 $nombre = htmlspecialchars($_POST['nombre']);
 $rut = $_POST['rut'];
 $alias = htmlspecialchars(trim($_POST['alias']));
-$email = $_POST['email'];
+$email = htmlspecialchars($_POST['email']);
 $region = (!empty($_POST['region'])? $_POST['region'] : '');
 $comuna = (!empty($_POST['comuna'])? $_POST['comuna'] : '');
 $candidato = (!empty($_POST['candidato'])? $_POST['candidato'] : '');
